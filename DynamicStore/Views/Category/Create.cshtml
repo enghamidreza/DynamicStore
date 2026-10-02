@@ -1,0 +1,182 @@
+﻿@model DynamicStore.Models.Category
+
+@{
+    ViewData["Title"] = "ایجاد دسته‌بندی جدید";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+
+        <!-- هدر و دکمه بازگشت -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">
+                    <i class="bi bi-folder-plus text-primary me-2"></i>تعریف دسته‌بندی جدید
+                </h4>
+                <p class="text-muted small mb-0">تعریف دسته کالا به همراه مشخصات فنی و ویژگی‌های پویا (Dynamic Attributes)</p>
+            </div>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center">
+                <i class="bi bi-arrow-right me-1"></i> بازگشت به لیست
+            </a>
+        </div>
+
+        <form asp-action="Create" method="post" id="categoryForm">
+            @Html.AntiForgeryToken()
+
+            <!-- کارت اطلاعات اصلی دسته -->
+            <div class="card shadow-sm border-0 rounded-3 mb-4">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="mb-0 fw-bold text-secondary">
+                        <i class="bi bi-info-circle me-1 text-primary"></i> اطلاعات کلی دسته‌بندی
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <label asp-for="Title" class="form-label fw-semibold text-dark">
+                                نام دسته‌بندی <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-tag text-muted"></i>
+                                </span>
+                                <input asp-for="Title" class="form-control border-start-0"
+                                       placeholder="مثلاً: گوشی موبایل، لپ‌تاپ، لوازم جانبی..." required />
+                            </div>
+                            <span asp-validation-for="Title" class="text-danger small mt-1 d-block"></span>
+                            <div class="form-text small text-muted mt-1">
+                                نام دسته اصلی که محصولات زیرمجموعه آن قرار می‌گیرند.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- کارت ویژگی‌های داینامیک -->
+            <div class="card shadow-sm border-0 rounded-3 mb-4">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1 fw-bold text-secondary">
+                            <i class="bi bi-sliders me-1 text-primary"></i> ویژگی‌های اختصاصی و داینامیک (EAV)
+                        </h6>
+                        <small class="text-muted">مشخصات فنی که محصولات این دسته باید داشته باشند (مثل رم، رنگ، وزن)</small>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary d-inline-flex align-items-center shadow-sm" onclick="addAttribute()">
+                        <i class="bi bi-plus-lg me-1"></i> افزودن ویژگی
+                    </button>
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- کانتینر ردیف‌های ویژگی -->
+                    <div id="attributes-container"></div>
+
+                    <!-- پیام زمانی که هیچ ویژگی وجود ندارد -->
+                    <div id="no-attributes-msg" class="text-center py-4 text-muted border border-dashed rounded-3 d-none">
+                        <i class="bi bi-inbox fs-3 d-block mb-1"></i>
+                        <span>هنوز هیچ ویژگی داینامیکی اضافه نشده است. برای افزودن دکمه بالا را بزنید.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- دکمه‌های عملیات پایین صفحه -->
+            <div class="d-flex align-items-center justify-content-end gap-2 mb-5">
+                <a asp-action="Index" class="btn btn-light px-4 border">انصراف</a>
+                <button type="submit" class="btn btn-success px-4 d-inline-flex align-items-center">
+                    <i class="bi bi-check-circle me-1"></i> ذخیره دسته‌بندی
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        let attrIndex = 0;
+
+        function addAttribute() {
+            const container = document.getElementById('attributes-container');
+            const emptyMsg = document.getElementById('no-attributes-msg');
+
+            // ساخت یک بلوک کارتی برای ردیف ویژگی
+            const row = document.createElement('div');
+            row.className = 'attribute-row p-3 mb-3 bg-light rounded-3 border transition-all';
+            row.id = `attr-row-${attrIndex}`;
+
+            row.innerHTML = `
+                <!-- اینپوت مخفی برای حل مشکل عدم توالی ایندکس‌ها در بایندر دات‌نت -->
+                <input type="hidden" name="Attributes.Index" value="${attrIndex}" />
+
+                <div class="row align-items-center g-3">
+                    <!-- عرض به col-md-10 تغییر یافت تا جای خالی منوی حذف شده را پر کند -->
+                    <div class="col-md-10">
+                        <label class="form-label small fw-semibold text-secondary mb-1">
+                            عنوان ویژگی <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white"><i class="bi bi-pencil-fill text-muted"></i></span>
+                            <input type="text" name="Attributes[${attrIndex}].Title" class="form-control"
+                                   placeholder="مثلاً: مقدار حافظه رم، رنگ، وزن" required />
+                        </div>
+                    </div>
+
+                    <!-- بخش DataType که حذف یا کامنت شد:
+                    <div class="col-md-5">
+                        <label class="form-label small fw-semibold text-secondary mb-1">
+                            نوع داده (Data Type)
+                        </label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white"><i class="bi bi-ui-checks text-muted"></i></span>
+                            <select name="Attributes[\${attrIndex}].DataType" class="form-select">
+                                <option value="0">متن (Text)</option>
+                                <option value="1">عدد (Number)</option>
+                                <option value="2">بله / خیر (Boolean)</option>
+                                <option value="3">لیست انتخابی (Dropdown)</option>
+                            </select>
+                        </div>
+                    </div>
+                    -->
+
+                    <div class="col-md-2 d-flex align-items-end pt-3 pt-md-0">
+                        <button type="button" class="btn btn-outline-danger btn-sm w-100 d-inline-flex align-items-center justify-content-center"
+                                onclick="removeAttributeRow(this)">
+                            <i class="bi bi-trash3 me-1"></i> حذف
+                        </button>
+                    </div>
+                </div>
+            `;
+
+
+            container.appendChild(row);
+            attrIndex++;
+            updateEmptyState();
+        }
+
+        function removeAttributeRow(button) {
+            const row = button.closest('.attribute-row');
+            if (row) {
+                row.remove();
+                updateEmptyState();
+            }
+        }
+
+        function updateEmptyState() {
+            const container = document.getElementById('attributes-container');
+            const emptyMsg = document.getElementById('no-attributes-msg');
+            if (container.children.length === 0) {
+                emptyMsg.classList.remove('d-none');
+            } else {
+                emptyMsg.classList.add('d-none');
+            }
+        }
+
+        // اضافه کردن یک فیلد به عنوان نمونه در زمان بارگذاری صفحه
+        document.addEventListener("DOMContentLoaded", function () {
+            addAttribute();
+        });
+    </script>
+}

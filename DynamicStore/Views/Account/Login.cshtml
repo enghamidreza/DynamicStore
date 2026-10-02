@@ -1,0 +1,128 @@
+﻿@{
+    ViewData["Title"] = "ورود به پنل مدیریت";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center align-items-center min-vh-75">
+        <div class="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
+
+            <!-- لوگو / هدر برند -->
+            <div class="text-center mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-shield-lock-fill fs-1"></i>
+                </div>
+                <h4 class="fw-bold text-dark mb-1">پنل مدیریت داینامیک استور</h4>
+                <p class="text-muted small">برای دسترسی به بخش مدیریت وارد شوید</p>
+            </div>
+
+            <!-- کارت ورود -->
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-body p-4 p-sm-5">
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger d-flex align-items-center alert-dismissible fade show rounded-3 py-2 small mb-4" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2 fs-5"></i>
+                            <div>@ViewBag.Error</div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <form asp-action="Login" method="post" id="loginForm" autocomplete="off">
+                        <!-- نام کاربری -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">نام کاربری</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted">
+                                    <i class="bi bi-person"></i>
+                                </span>
+                                <input type="text"
+                                       id="usernameInput"
+                                       name="username"
+                                       class="form-control bg-light border-start-0 ps-0"
+                                       placeholder="نام کاربری خود را وارد کنید"
+                                       required
+                                       autofocus />
+                            </div>
+                        </div>
+
+                        <!-- رمز عبور -->
+                        <div class="mb-4">
+                            <label class="form-label small fw-semibold text-secondary">رمز عبور</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted">
+                                    <i class="bi bi-key"></i>
+                                </span>
+                                <input type="password"
+                                       id="passwordInput"
+                                       name="password"
+                                       class="form-control bg-light border-start-0 border-end-0 ps-0"
+                                       placeholder="••••••••"
+                                       required />
+                                <button class="btn btn-light border border-start-0 text-muted" type="button" id="togglePasswordBtn">
+                                    <i class="bi bi-eye" id="toggleIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- دکمه ورود -->
+                        <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-bold shadow-sm d-flex align-items-center justify-content-center">
+                            <i class="bi bi-box-arrow-in-right me-2 fs-5"></i> ورود به سیستم
+                        </button>
+                    </form>
+
+                    <!-- راهنمای دمو مخصوص ارزیابی و مصاحبه‌کننده -->
+                    <div class="mt-4 p-3 bg-light rounded-3 border border-dashed text-center">
+                        <div class="small text-muted mb-1">
+                            <i class="bi bi-info-circle text-primary me-1"></i> اطلاعات ورود تستی (Demo)
+                        </div>
+                        <div class="d-flex justify-content-center align-items-center gap-2 small">
+                            <code>admin</code> / <code>admin123</code>
+                            <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;" onclick="fillDemoCredentials()">
+                                پر کردن خودکار
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- لینک بازگشت -->
+            <div class="text-center mt-4">
+                <a asp-controller="Shop" asp-action="Index" class="text-decoration-none text-muted small d-inline-flex align-items-center hover-primary">
+                    <i class="bi bi-arrow-right me-1"></i> بازگشت به ویترین فروشگاه
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // نمایش / مخفی‌سازی رمز عبور
+        const toggleBtn = document.getElementById('togglePasswordBtn');
+        const passwordInput = document.getElementById('passwordInput');
+        const toggleIcon = document.getElementById('toggleIcon');
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function () {
+                const isPassword = passwordInput.getAttribute('type') === 'password';
+                passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+                toggleIcon.classList.toggle('bi-eye');
+                toggleIcon.classList.toggle('bi-eye-slash');
+            });
+        }
+
+        // تابع کمکی برای تست سریع در جلسه مصاحبه
+        function fillDemoCredentials() {
+            const userInp = document.getElementById('usernameInput');
+            const passInp = document.getElementById('passwordInput');
+            if (userInp && passInp) {
+                userInp.value = 'admin';
+                passInp.value = 'admin123';
+                userInp.focus();
+            }
+        }
+    </script>
+}

@@ -1,0 +1,233 @@
+﻿@model IEnumerable<DynamicStore.Models.Product>
+
+@{
+    ViewData["Title"] = "مدیریت محصولات";
+    var totalCount = Model?.Count() ?? 0;
+    var activeCount = Model?.Count(p => p.IsActive) ?? 0;
+}
+
+<div class="container-fluid px-lg-4 py-3" dir="rtl">
+
+    <!-- اعلان پیام موفقیت -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 d-flex align-items-center mb-4" role="alert">
+            <i class="bi bi-check-circle-fill fs-5 me-2 text-success"></i>
+            <div>@TempData["SuccessMessage"]</div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- هدر صفحه و آمار سریع -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-body p-3 p-md-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <h4 class="fw-bold text-dark mb-1">
+                        <i class="bi bi-boxes text-primary me-2"></i>مدیریت کالا و محصولات
+                    </h4>
+                    <p class="text-muted small mb-0">مشاهده، ویرایش، حذف و کنترل وضعیت موجودی کالاهای فروشگاه</p>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-light text-secondary border px-3 py-2">
+                        کل محصولات: <strong class="text-dark">@totalCount</strong>
+                    </span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
+                        فعال: <strong>@activeCount</strong>
+                    </span>
+                    <a asp-action="Create" class="btn btn-primary d-inline-flex align-items-center shadow-sm">
+                        <i class="bi bi-plus-lg me-1"></i> تعریف محصول جدید
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- کارت اصلی جدول و ابزار جستجو -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white py-3 border-bottom">
+            <div class="row g-2 align-items-center justify-content-between">
+                <div class="col-12 col-md-5 col-lg-4">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" id="productSearchInput" class="form-control border-start-0"
+                               placeholder="جستجوی سریع بر اساس نام، کد یا دسته..." />
+                    </div>
+                </div>
+                <div class="col-auto text-muted small">
+                    نمایش <span id="visibleRowsCount" class="fw-bold text-dark">@totalCount</span> مورد
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-center" id="productsTable">
+                        <thead class="table-light text-secondary small text-uppercase">
+                            <tr>
+                                <th style="width: 85px;">تصویر</th>
+                                <th style="width: 130px;">کد محصول</th>
+                                <th class="text-end">نام و عنوان محصول</th>
+                                <th>دسته‌بندی</th>
+                                <th>قیمت (تومان)</th>
+                                <th>وضعیت</th>
+                                <th style="width: 140px;">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr class="product-row">
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.ImageName))
+                                        {
+                                            <img src="~/images/products/@item.ImageName"
+                                                 asp-append-version="true"
+                                                 alt="@item.Title"
+                                                 class="rounded-3 border shadow-sm"
+                                                 style="width: 55px; height: 55px; object-fit: cover;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-3 border text-muted"
+                                                 style="width: 55px; height: 55px;">
+                                                <i class="bi bi-image fs-4"></i>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border font-monospace px-2 py-1">
+                                            @item.Code
+                                        </span>
+                                    </td>
+                                    <td class="text-end fw-semibold text-dark">
+                                        @item.Title
+                                    </td>
+                                    <td>
+                                        @if (item.Category != null)
+                                        {
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1">
+                                                <i class="bi bi-folder2 me-1"></i>@item.Category.Title
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">—</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold text-success fs-6">
+                                            @item.Price.ToString("N0")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (item.IsActive)
+                                        {
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">
+                                                <i class="bi bi-check2-circle me-1"></i>فعال
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1">
+                                                <i class="bi bi-x-circle me-1"></i>غیرفعال
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a asp-action="Edit" asp-route-id="@item.Id"
+                                               class="btn btn-outline-warning"
+                                               title="ویرایش محصول">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                            <button type="button"
+                                                    class="btn btn-outline-danger"
+                                                    onclick="confirmDelete(@item.Id, '@item.Title')"
+                                                    title="حذف محصول">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- پیام در صورت عدم تطابق با فیلتر جستجو -->
+                <div id="noMatchMessage" class="text-center py-5 d-none">
+                    <i class="bi bi-search fs-1 text-muted d-block mb-2"></i>
+                    <h6 class="text-secondary fw-bold">محصولی با این مشخصات یافت نشد!</h6>
+                    <p class="text-muted small">عبارت جستجو را تغییر داده یا پاک کنید.</p>
+                </div>
+            }
+            else
+            {
+                <!-- حالت خالی بودن کل دیتابیس محصولات -->
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="bi bi-box2 text-muted" style="font-size: 3.5rem;"></i>
+                    </div>
+                    <h5 class="fw-bold text-secondary">هنوز هیچ محصولی ثبت نشده است!</h5>
+                    <p class="text-muted small mb-3">برای شروع فروش، اولین کالای فروشگاه را تعریف نمایید.</p>
+                    <a asp-action="Create" class="btn btn-primary btn-sm px-3">
+                        <i class="bi bi-plus-lg me-1"></i> ایجاد اولین محصول
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- فرم مخفی برای ارسال درخواست حذف (ارسال امن POST) -->
+<form id="deleteForm" asp-action="Delete" method="post" style="display:none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" id="deleteProductId" />
+</form>
+
+@section Scripts {
+    <!-- اسکریپت اصلی حذف که از قبل داشتید -->
+    <script src="~/js/product-admin.js"></script>
+
+    <!-- جستجوی زنده کلاینت‌ساید در جدول -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('productSearchInput');
+            const rows = document.querySelectorAll('#productsTable tbody tr.product-row');
+            const counter = document.getElementById('visibleRowsCount');
+            const noMatchMsg = document.getElementById('noMatchMessage');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function () {
+                    const query = this.value.trim().toLowerCase();
+                    let visibleCount = 0;
+
+                    rows.forEach(row => {
+                        const text = row.innerText.toLowerCase();
+                        if (text.includes(query)) {
+                            row.style.display = '';
+                            visibleCount++;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    if (counter) counter.innerText = visibleCount;
+
+                    if (noMatchMsg) {
+                        if (visibleCount === 0 && rows.length > 0) {
+                            noMatchMsg.classList.remove('d-none');
+                        } else {
+                            noMatchMsg.classList.add('d-none');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}

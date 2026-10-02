@@ -1,0 +1,43 @@
+﻿@model DynamicStore.Models.CheckoutViewModel
+
+<div class="container mt-5" dir="rtl">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">تکمیل اطلاعات ارسال</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Checkout" method="post">
+                        <div class="mb-3">
+                            <label asp-for="CustomerName" class="form-label">نام و نام خانوادگی تحویل گیرنده</label>
+                            <input asp-for="CustomerName" class="form-control" placeholder="مثال: علی رضایی" />
+                            <span asp-validation-for="CustomerName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label">شماره موبایل</label>
+                            <input asp-for="PhoneNumber" class="form-control" placeholder="09xxxxxxxxx" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Address" class="form-label">آدرس دقیق پستی</label>
+                            <textarea asp-for="Address" class="form-control" rows="3" placeholder="استان، شهر، خیابان، پلاک، واحد"></textarea>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">ثبت نهایی سفارش</button>
+                            <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-secondary">بازگشت به سبد خرید</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
