@@ -37,15 +37,6 @@
 
 ---
 
-## 💻 نحوه اجرا (Getting Started)
-
-برای اجرای این پروژه روی سیستم خود، مراحل زیر را دنبال کنید:
-
-### پیش‌نیازها
-- نصب [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-- نصب SQL Server و SQL Server Management Studio (SSMS) یا Visual Studio
-
-### مراحل نصب
 1. **کلون کردن مخزن:**
 ```bash
    git clone https://github.com/YourUsername/DynamicStore.git
