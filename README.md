@@ -1,40 +1,95 @@
-# 🛒 DynamicStore - پلتفرم فروشگاهی داینامیک
 
-یک سامانه فروشگاه‌ساز آنلاین مبتنی بر **ASP.NET Core MVC** با تمرکز بر معماری مقیاس‌پذیر و مدیریت ویژگی‌های پویا (Dynamic Attributes). 
-این پروژه به عنوان یک نمونه‌کار جامع برای نمایش مهارت‌ها در زمینه طراحی دیتابیس (معماری EAV)، امنیت، و توسعه بک‌اند پیاده‌سازی شده است.
+```markdown
+# 🛒 DynamicStore - EAV-Based E-Commerce Platform
 
----
+DynamicStore is a robust, scalable e-commerce solution built with **ASP.NET Core 9 MVC** and **Entity Framework Core**. It is designed to handle diverse product types efficiently using the **EAV (Entity-Attribute-Value)** architectural pattern, eliminating the need for rigid database schemas when adding new product categories.
 
-## 🚀 ویژگی‌های کلیدی (Features)
-
-### 🛡️ مدیریت و ادمین (Admin Panel)
-- **معماری EAV (Entity-Attribute-Value):** امکان تعریف ویژگی‌های متغیر و داینامیک (مثل رنگ، رم، وزن و...) برای هر دسته‌بندی کالا، بدون نیاز به تغییر ساختار دیتابیس.
-- **مدیریت کالاها:** تخصیص مقدار به ویژگی‌های داینامیک در زمان تعریف محصول جدید و مدیریت آپلود/حذف ایمن تصاویر محصولات.
-- **مدیریت سفارشات:** پنل اختصاصی برای مشاهده ریز تراکنش‌ها، اطلاعات مشتری و اقلام خریداری شده.
-- **احراز هویت و امنیت:** پیاده‌سازی Role-Based Authentication با استفاده از `Cookie Auth` برای محافظت از مسیرهای ادمین و جلوگیری از دسترسی غیرمجاز.
-- **حذف منطقی (Soft Delete):** جلوگیری از حذف فیزیکی داده‌های حساس (نظیر دسته‌بندی‌ها یا محصولات دارای سفارش) برای حفظ یکپارچگی اطلاعات.
-
-### 🛍️ سمت مشتری (Storefront) *[در حال توسعه]*
-- کاتالوگ و نمایش محصولات با رابط کاربری ریسپانسیو (Bootstrap 5).
-- مشاهده جزئیات محصول به همراه ویژگی‌های داینامیک ثبت شده.
-- سیستم سبد خرید و ثبت سفارش.
+This project serves as a comprehensive demonstration of professional backend development, database architecture, and security best practices.
 
 ---
 
-## 🛠️ تکنولوژی‌های استفاده شده (Tech Stack)
+## 🚀 Key Features
 
-- **Framework:** .NET 9, ASP.NET Core MVC
-- **Database ORM:** Entity Framework Core (Code First)
-- **Database:** Microsoft SQL Server
-- **Frontend:** HTML5, CSS3, Bootstrap 5, jQuery/AJAX
-- **Authentication:** ASP.NET Core Cookie Authentication
+### 🛡️ Admin Panel
+*   **Dynamic Attribute Management (EAV):** A highly flexible system allowing admins to define custom attributes (e.g., RAM, Weight, Material) for different product categories without altering the database schema.
+*   **Order Management:** A full CRUD interface for monitoring and managing customer orders, including real-time status tracking.
+*   **Security & Auth:** Role-Based Access Control (RBAC) utilizing ASP.NET Core Cookie Authentication to secure admin-only routes.
+*   **Product & Category CRUD:** Manage your entire inventory with validation, file upload support, and soft-delete capabilities to maintain data integrity.
+
+### 🛍️ Client-Side (Storefront) *[In Progress]*
+*   Responsive UI built with Bootstrap 5.
+*   Dynamic product catalog and details pages.
+*   Shopping cart logic and secure checkout flow.
 
 ---
 
-## ⚙️ معماری دیتابیس (Database Architecture)
-یکی از چالش‌های اصلی در فروشگاه‌های چندمنظوره، تفاوت ویژگی‌های محصولات است (مثلاً لپ‌تاپ نیاز به "RAM" دارد اما لباس نیاز به "سایز" دارد). 
-در این پروژه با استفاده از الگوی **EAV**، جداول به گونه‌ای طراحی شده‌اند که مدیر سیستم می‌تواند بی‌نهایت ویژگی اختصاصی برای هر دسته تعریف کرده و مقادیر آن‌ها را به صورت داینامیک به محصولات متصل کند.
+## 🛠️ Tech Stack
+
+*   **Framework:** .NET 9, ASP.NET Core MVC
+*   **ORM:** Entity Framework Core (Code First)
+*   **Database:** Microsoft SQL Server
+*   **Frontend:** HTML5, CSS3, Bootstrap 5, jQuery/AJAX
+*   **Security:** ASP.NET Identity/Cookie Auth
 
 ---
 
-   
+## 🏗️ Architecture Highlight: EAV Pattern
+The core strength of this project is its database architecture. Instead of adding columns for every product feature (which creates sparse tables), I implemented the **EAV pattern**. This allows the store to support vastly different products simultaneously—such as "Laptops" (RAM, CPU) and "Apparel" (Size, Color)—within the same underlying table structure.
+
+---
+
+## 💻 Getting Started
+
+### Prerequisites
+*   [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+*   SQL Server (or LocalDB)
+
+### Setup Instructions
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/YourUsername/DynamicStore.git
+    cd DynamicStore
+    ```
+
+2.  **Configure Database Connection:**
+    Update your `appsettings.json` file with your SQL Server connection string:
+    ```json
+    "ConnectionStrings": {
+      "DefaultConnection": "Server=.;Database=DynamicStoreDb;Trusted_Connection=True;TrustServerCertificate=True"
+    }
+    ```
+
+3.  **Apply Migrations:**
+    Run the following command to set up the database schema:
+    ```bash
+    dotnet ef database update
+    ```
+
+4.  **Run the Project:**
+    ```bash
+    dotnet run
+    ```
+
+---
+
+## 📸 Project Showcase
+
+*(Tip: Upload screenshots of your Admin dashboard, the Dynamic Attribute configuration form, and the product listing to your repo and link them here to impress recruiters.)*
+
+*   **Admin Dashboard:** Manage products, categories, and orders seamlessly.
+*   **EAV Editor:** A clean interface to add/edit dynamic properties for any category.
+
+---
+
+## 📞 Contact
+
+*   **Developer:** [Your Name]
+*   **Email:** [Your Email Address]
+*   **LinkedIn:** [Link to your LinkedIn Profile]
+
+---
+
+## 📜 License
+This project is open-source and available under the [MIT License](LICENSE).
+```
