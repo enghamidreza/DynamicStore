@@ -37,8 +37,4 @@
 
 ---
 
-1. **کلون کردن مخزن:**
-```bash
-   git clone https://github.com/YourUsername/DynamicStore.git
-   cd DynamicStore
    
