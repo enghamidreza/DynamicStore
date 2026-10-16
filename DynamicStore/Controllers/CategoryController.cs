@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DynamicStore.Controllers
 {
-    [Authorize] // فقط کاربران لاگین شده (مدیر) دسترسی دارند
+    // فقط کاربران لاگین شده (مدیر) دسترسی دارند
+    [Authorize(Roles = "Admin")]
     public class CategoryController : Controller
     {
         private readonly AppDbContext _context;
@@ -54,22 +55,81 @@ namespace DynamicStore.Controllers
             return View(category);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> QuickEdit(int id, string title)
+        // نمایش فرم ویرایش کامل دسته‌بندی
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
         {
-            if (string.IsNullOrWhiteSpace(title))
-                return Json(new { success = false, message = "عنوان دسته‌بندی نمی‌تواند خالی باشد." });
+            var category = await _context.Categories
+                .Include(c => c.Attributes)
+                .FirstOrDefaultAsync(c => c.Id == id);
 
-            var category = await _context.Categories.FindAsync(id);
             if (category == null)
-                return Json(new { success = false, message = "دسته‌بندی یافت نشد." });
+                return NotFound();
 
-            category.Title = title;
-            await _context.SaveChangesAsync();
-
-            return Json(new { success = true, message = "ویرایش با موفقیت انجام شد." });
+            return View(category);
         }
 
+        // ذخیره تغییرات دسته‌بندی و ویژگی‌های داینامیک
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Category category)
+        {
+            if (id != category.Id)
+                return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                var existingCategory = await _context.Categories
+                    .Include(c => c.Attributes)
+                    .FirstOrDefaultAsync(c => c.Id == id);
+
+                if (existingCategory == null)
+                    return NotFound();
+
+                // 1. آپدیت نام دسته
+                existingCategory.Title = category.Title;
+
+                // پاکسازی ویژگی‌های خالی ارسال شده
+                var submittedAttributes = category.Attributes?
+                    .Where(a => !string.IsNullOrWhiteSpace(a.Title)).ToList() ?? new List<CategoryAttribute>();
+
+                // 2. حذف ویژگی‌هایی که در دیتابیس هستند اما ادمین در فرم پاک کرده است
+                var submittedAttrIds = submittedAttributes.Select(a => a.Id).ToList();
+                var attributesToRemove = existingCategory.Attributes
+                    .Where(a => !submittedAttrIds.Contains(a.Id))
+                    .ToList();
+
+                // در EF Core اگر موجودیتی را از کالکشن حذف کنید (و آبجکت‌های وابسته باشند)، باید آنها را از کانتکست هم ریمو کنید
+                foreach (var attr in attributesToRemove)
+                {
+                    existingCategory.Attributes.Remove(attr);
+                    _context.Remove(attr);
+                }
+
+                // 3. آپدیت ویژگی‌های موجود و اضافه کردن ویژگی‌های جدید
+                foreach (var attr in submittedAttributes)
+                {
+                    var existingAttr = existingCategory.Attributes.FirstOrDefault(a => a.Id == attr.Id && attr.Id != 0);
+                    if (existingAttr != null)
+                    {
+                        // آپدیت ویژگی موجود
+                        existingAttr.Title = attr.Title;
+                    }
+                    else
+                    {
+                        // افزودن ویژگی جدید
+                        existingCategory.Attributes.Add(new CategoryAttribute
+                        {
+                            Title = attr.Title
+                        });
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(category);
+        }
 
         [HttpPost]
         public async Task<IActionResult> Delete(int id)

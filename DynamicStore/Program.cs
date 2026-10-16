@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -12,13 +13,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 // ----------------------------------------------
 
-// تنظیمات احراز هویت با کوکی
+// 👇 فقط همین یک بار احراز هویت را معرفی می‌کنیم (تنظیمات ادغام شدند) 👇
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/Account/Login"; // مسیری که کاربر در صورت عدم دسترسی به آن هدایت می‌شود
+        options.LoginPath = "/Account/Login";
         options.LogoutPath = "/Account/Logout";
-        options.ExpireTimeSpan = TimeSpan.FromDays(1); // مدت زمان اعتبار کوکی
+        options.AccessDeniedPath = "/Account/Login"; // اگر دسترسی ادمین نداشت به لاگین برود
+        options.ExpireTimeSpan = TimeSpan.FromDays(1);
     });
 
 
@@ -30,6 +32,7 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
 
 
 

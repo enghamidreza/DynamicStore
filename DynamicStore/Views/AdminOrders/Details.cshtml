@@ -1,0 +1,73 @@
+﻿@model DynamicStore.Models.Order
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "عنوان صفحه";
+}
+
+@{
+    ViewData["Title"] = $"جزئیات سفارش شماره {Model.Id}";
+}
+
+<div class="container mt-4" dir="rtl">
+    <h1 class="mb-4">@ViewData["Title"]</h1>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">اطلاعات مشتری</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>نام و نام خانوادگی:</strong> @Model.CustomerName</p>
+            <p><strong>شماره تماس:</strong> @Model.PhoneNumber</p>
+            <p><strong>آدرس:</strong> @Model.Address</p>
+            <p><strong>تاریخ سفارش:</strong> @Model.OrderDate.ToString("yyyy/MM/dd - HH:mm")</p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">اقلام سفارش</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead class="table-light">
+                        <tr>
+                            <th>تصویر</th>
+                            <th>نام محصول</th>
+                            <th>قیمت واحد (تومان)</th>
+                            <th>تعداد</th>
+                            <th>مبلغ کل (تومان)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.OrderItems)
+                        {
+                            <tr>
+                                <td>
+                                    <img src="~/images/products/@item.Product?.ImageName" alt="@item.Product?.Title" class="img-thumbnail" style="width: 70px; height: 70px; object-fit: cover;" />
+                                </td>
+                                <td>@item.Product?.Title</td>
+                                <td>@item.Price.ToString("N0")</td>
+                                <td>@item.Quantity</td>
+                                <td>@((item.Price * item.Quantity).ToString("N0"))</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="table-group-divider">
+                        <tr class="fw-bold fs-5">
+                            <td colspan="4" class="text-end">مبلغ نهایی سفارش:</td>
+                            <td>@Model.TotalAmount.ToString("N0") تومان</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-right"></i> بازگشت به لیست سفارشات
+        </a>
+    </div>
+</div>

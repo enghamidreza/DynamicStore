@@ -1,6 +1,11 @@
 ﻿@model IEnumerable<Category>
 
 @{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "عنوان صفحه";
+}
+
+@{
     ViewData["Title"] = "مدیریت دسته‌بندی‌ها";
     var totalCount = Model?.Count() ?? 0;
 }
@@ -80,37 +85,26 @@
                                     </span>
                                 </td>
 
-                                <!-- ستون عنوان (حفظ کامل آیدی‌ها و کلاس‌ها برای JS) -->
+                                <!-- ستون عنوان -->
                                 <td class="text-start ps-4">
-                                    <span class="view-mode fw-semibold text-dark" id="title-text-@item.Id">
+                                    <span class="fw-semibold text-dark">
                                         @item.Title
                                     </span>
-                                    <input type="text"
-                                           class="form-control form-control-sm edit-mode d-none w-75"
-                                           id="title-input-@item.Id"
-                                           value="@item.Title" />
                                 </td>
 
-                                <!-- ستون دکمه‌ها (حفظ نام توابع onclick) -->
+                                <!-- ستون دکمه‌ها -->
                                 <td>
-                                    <div class="view-mode d-flex justify-content-center gap-2">
-                                        <button class="btn btn-sm btn-outline-warning px-2 py-1" onclick="enableEdit(@item.Id)" title="ویرایش">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning px-2 py-1" title="ویرایش کامل">
                                             <i class="bi bi-pencil-square me-1"></i>ویرایش
-                                        </button>
+                                        </a>
                                         <button class="btn btn-sm btn-outline-danger px-2 py-1" onclick="deleteCategory(@item.Id)" title="حذف">
                                             <i class="bi bi-trash3 me-1"></i>حذف
                                         </button>
                                     </div>
-
-                                    <div class="edit-mode d-none d-flex justify-content-center gap-2">
-                                        <button class="btn btn-sm btn-success px-2 py-1" onclick="saveEdit(@item.Id)">
-                                            <i class="bi bi-check-lg me-1"></i>ذخیره
-                                        </button>
-                                        <button class="btn btn-sm btn-secondary px-2 py-1" onclick="cancelEdit(@item.Id)">
-                                            <i class="bi bi-x-lg me-1"></i>انصراف
-                                        </button>
-                                    </div>
                                 </td>
+
+
                             </tr>
                         }
                     </tbody>
@@ -119,18 +113,28 @@
         }
     </div>
 </div>
-
 @section Scripts {
     <script src="~/js/category-inline.js" asp-append-version="true"></script>
     <script>
-        // اسکریپت فیلتر لحظه‌ای جدول با تایپ کردن
-        $(document).ready(function () {
-            $("#categoryQuickSearch").on("keyup", function () {
-                var value = $(this).val().toLowerCase().trim();
-                $("#categoryTableBody tr").filter(function () {
-                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+        // اسکریپت فیلتر لحظه‌ای جدول با جاوااسکریپت استاندارد (بدون نیاز به jQuery)
+        document.addEventListener("DOMContentLoaded", function () {
+            var searchInput = document.getElementById("categoryQuickSearch");
+            if (searchInput) {
+                searchInput.addEventListener("keyup", function () {
+                    var filter = this.value.toLowerCase().trim();
+                    var rows = document.querySelectorAll("#categoryTableBody tr");
+
+                    rows.forEach(function (row) {
+                        var text = row.textContent || row.innerText;
+                        if (text.toLowerCase().indexOf(filter) > -1) {
+                            row.style.display = "";
+                        } else {
+                            row.style.display = "none";
+                        }
+                    });
                 });
-            });
+            }
         });
     </script>
 }
+

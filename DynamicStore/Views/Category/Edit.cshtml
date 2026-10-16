@@ -1,0 +1,182 @@
+﻿@model DynamicStore.Models.Category
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "عنوان صفحه";
+}
+
+@{
+    ViewData["Title"] = "ویرایش دسته‌بندی";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">
+                    <i class="bi bi-pencil-square text-warning me-2"></i>ویرایش دسته‌بندی
+                </h4>
+            </div>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center">
+                <i class="bi bi-arrow-right me-1"></i> بازگشت به لیست
+            </a>
+        </div>
+
+        <form asp-action="Edit" method="post" id="categoryForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <!-- کارت اطلاعات اصلی دسته -->
+            <div class="card shadow-sm border-0 rounded-3 mb-4">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="mb-0 fw-bold text-secondary">
+                        <i class="bi bi-info-circle me-1 text-primary"></i> اطلاعات کلی دسته‌بندی
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <label asp-for="Title" class="form-label fw-semibold text-dark">
+                                نام دسته‌بندی <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-tag text-muted"></i>
+                                </span>
+                                <input asp-for="Title" class="form-control border-start-0" required />
+                            </div>
+                            <span asp-validation-for="Title" class="text-danger small mt-1 d-block"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- کارت ویژگی‌های داینامیک -->
+            <div class="card shadow-sm border-0 rounded-3 mb-4">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1 fw-bold text-secondary">
+                            <i class="bi bi-sliders me-1 text-primary"></i> ویژگی‌های اختصاصی (EAV)
+                        </h6>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary d-inline-flex align-items-center shadow-sm" onclick="addAttribute()">
+                        <i class="bi bi-plus-lg me-1"></i> افزودن ویژگی جدید
+                    </button>
+                </div>
+
+                <div class="card-body p-4">
+                    <div id="attributes-container">
+                        @if (Model.Attributes != null && Model.Attributes.Any())
+                        {
+                            // کالکشن را به لیست تبدیل می‌کنیم تا قابلیت استفاده از [i] را داشته باشد
+                            var attributesList = Model.Attributes.ToList();
+
+                            for (int i = 0; i < attributesList.Count; i++)
+                            {
+                                <div class="attribute-row p-3 mb-3 bg-light rounded-3 border transition-all" id="attr-row-@i">
+                                    <input type="hidden" name="Attributes.Index" value="@i" />
+                                    <!-- استفاده از attributesList به جای Model.Attributes -->
+                                    <input type="hidden" name="Attributes[@i].Id" value="@attributesList[i].Id" />
+
+                                    <div class="row align-items-center g-3">
+                                        <div class="col-md-10">
+                                            <label class="form-label small fw-semibold text-secondary mb-1">
+                                                عنوان ویژگی <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text bg-white"><i class="bi bi-pencil-fill text-muted"></i></span>
+                                                <input type="text" name="Attributes[@i].Title" class="form-control" value="@attributesList[i].Title" required />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 d-flex align-items-end pt-3 pt-md-0">
+                                            <button type="button" class="btn btn-outline-danger btn-sm w-100 d-inline-flex align-items-center justify-content-center" onclick="removeAttributeRow(this)">
+                                                <i class="bi bi-trash3 me-1"></i> حذف
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+
+
+                    <div id="no-attributes-msg" class="text-center py-4 text-muted border border-dashed rounded-3 @(Model.Attributes != null && Model.Attributes.Any() ? "d-none" : "")">
+                        <i class="bi bi-inbox fs-3 d-block mb-1"></i>
+                        <span>هنوز هیچ ویژگی داینامیکی اضافه نشده است.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- دکمه‌ها -->
+            <div class="d-flex align-items-center justify-content-end gap-2 mb-5">
+                <a asp-action="Index" class="btn btn-light px-4 border">انصراف</a>
+                <button type="submit" class="btn btn-success px-4 d-inline-flex align-items-center">
+                    <i class="bi bi-check-circle me-1"></i> ثبت تغییرات
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        // ایندکس بعدی برابر با تعداد ویژگی‌های موجود مدل تنظیم می‌شود تا با قبلی‌ها تداخل نداشته باشد
+        let attrIndex = @(Model.Attributes != null ? Model.Attributes.Count : 0)
+
+        function addAttribute() {
+            const container = document.getElementById('attributes-container');
+
+            const row = document.createElement('div');
+            row.className = 'attribute-row p-3 mb-3 bg-light rounded-3 border transition-all';
+            row.id = `attr-row-${attrIndex}`;
+
+            row.innerHTML = `
+                <input type="hidden" name="Attributes.Index" value="${attrIndex}" />
+                <input type="hidden" name="Attributes[${attrIndex}].Id" value="0" />
+                <div class="row align-items-center g-3">
+                    <div class="col-md-10">
+                        <label class="form-label small fw-semibold text-secondary mb-1">
+                            عنوان ویژگی <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white"><i class="bi bi-pencil-fill text-muted"></i></span>
+                            <input type="text" name="Attributes[${attrIndex}].Title" class="form-control" placeholder="ویژگی جدید" required />
+                        </div>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end pt-3 pt-md-0">
+                        <button type="button" class="btn btn-outline-danger btn-sm w-100 d-inline-flex align-items-center justify-content-center" onclick="removeAttributeRow(this)">
+                            <i class="bi bi-trash3 me-1"></i> حذف
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(row);
+            attrIndex++;
+            updateEmptyState();
+        }
+
+        function removeAttributeRow(button) {
+            const row = button.closest('.attribute-row');
+            if (row) {
+                row.remove();
+                updateEmptyState();
+            }
+        }
+
+        function updateEmptyState() {
+            const container = document.getElementById('attributes-container');
+            const emptyMsg = document.getElementById('no-attributes-msg');
+            if (container.children.length === 0) {
+                emptyMsg.classList.remove('d-none');
+            } else {
+                emptyMsg.classList.add('d-none');
+            }
+        }
+    </script>
+}
