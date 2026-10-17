@@ -1,0 +1,61 @@
+﻿@model DynamicStore.ViewModel.RegisterViewModel
+@{
+    ViewData["Title"] = "ثبت‌نام در فروشگاه";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-success text-white text-center py-3">
+                <h5 class="mb-0 fw-bold">ایجاد حساب کاربری جدید</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-controller="Account" asp-action="Register" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="FullName" class="form-label fw-bold">نام و نام خانوادگی</label>
+                        <input asp-for="FullName" class="form-control" placeholder="مثال: علی محمدی" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label fw-bold">ایمیل</label>
+                        <input asp-for="Email" class="form-control" placeholder="name@example.com" dir="ltr" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PhoneNumber" class="form-label fw-bold">شماره تماس</label>
+                        <input asp-for="PhoneNumber" class="form-control" placeholder="09123456789" dir="ltr" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label fw-bold">کلمه عبور</label>
+                        <input asp-for="Password" class="form-control" type="password" dir="ltr" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ConfirmPassword" class="form-label fw-bold">تکرار کلمه عبور</label>
+                        <input asp-for="ConfirmPassword" class="form-control" type="password" dir="ltr" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 py-2 fw-bold mt-2">ثبت نام</button>
+
+                    <div class="text-center mt-3">
+                        <span>قبلاً حساب کاربری داشته‌اید؟ </span>
+                        <a asp-controller="Account" asp-action="Login" class="text-decoration-none">ورود به حساب</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

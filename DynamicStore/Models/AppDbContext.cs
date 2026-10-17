@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace DynamicStore.Models
 {
-    public class AppDbContext : DbContext
+    // ارث‌بری از IdentityDbContext به همراه کلاس سفارشی کاربر
+    public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -13,9 +15,9 @@ namespace DynamicStore.Models
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // بسیار حیاتی: کانفیگ جداول Identity (کاربران، رول‌ها، کلیم‌ها)
             base.OnModelCreating(modelBuilder);
 
             // جلوگیری از حذف آبشاری (Cascade Delete) در مقادیر ویژگی‌ها تا خطای سیکل در SQL Server نگیریم

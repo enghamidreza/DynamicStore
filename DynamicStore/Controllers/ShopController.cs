@@ -1,4 +1,5 @@
 ﻿using DynamicStore.Models;
+using DynamicStore.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

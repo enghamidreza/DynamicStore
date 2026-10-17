@@ -1,4 +1,6 @@
-﻿namespace DynamicStore.Models
+﻿using DynamicStore.Models;
+
+namespace DynamicStore.ViewModel
 {
     public class ShopIndexViewModel
     {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DynamicStore.Models
+namespace DynamicStore.ViewModel
 {
     public class CheckoutViewModel
     {

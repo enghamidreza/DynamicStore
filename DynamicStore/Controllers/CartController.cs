@@ -1,5 +1,6 @@
 ﻿using DynamicStore.Extensions;
 using DynamicStore.Models;
+using DynamicStore.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DynamicStore.Controllers

@@ -1,4 +1,4 @@
-﻿namespace DynamicStore.Models
+﻿namespace DynamicStore.ViewModel
 {
     public class CartViewModels
     {

@@ -1,45 +1,32 @@
-﻿using DynamicStore.Models;
-using Microsoft.AspNetCore.Http;
+﻿using DynamicStore.Extensions; // برای GetObject روی Session
+using DynamicStore.Models;
+using DynamicStore.ViewModel;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using DynamicStore.Extensions;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace DynamicStore.Controllers
 {
+    [Authorize] // کل فرایند ثبت سفارش فقط برای کاربران واردشده مجاز است
     public class OrderController : Controller
     {
         private readonly AppDbContext _context;
-        // تعریف دقیق همان کلیدی که در CartController استفاده شده است
+        private readonly UserManager<ApplicationUser> _userManager;
         private const string CartSessionKey = "DynamicStore_Cart";
 
-        public OrderController(AppDbContext context)
+        public OrderController(AppDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // نمایش فرم دریافت اطلاعات مشتری
         [HttpGet]
-        public IActionResult Checkout()
+        public async Task<IActionResult> Checkout()
         {
-            // خواندن دقیق مدل CartViewModels با همان کلید اصلی
-            var cart = HttpContext.Session.GetObject<CartViewModels>(CartSessionKey) ?? new CartViewModels();
-
-            if (cart.Items == null || cart.Items.Count == 0)
-            {
-                return RedirectToAction("Index", "Cart"); // اگر سبد خالی بود برگردد به سبد
-            }
-            return View();
-        }
-
-        // پردازش فرم و ذخیره در دیتابیس
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Checkout(CheckoutViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
             var cart = HttpContext.Session.GetObject<CartViewModels>(CartSessionKey) ?? new CartViewModels();
 
             if (cart.Items == null || cart.Items.Count == 0)
@@ -47,22 +34,55 @@ namespace DynamicStore.Controllers
                 return RedirectToAction("Index", "Cart");
             }
 
+            // خواندن کاربر فعلی برای پر کردن خودکار فیلدهای فرم
+            var user = await _userManager.GetUserAsync(User);
+
+            var model = new CheckoutViewModel
+            {
+                CustomerName = user?.FullName ?? string.Empty,
+                PhoneNumber = user?.PhoneNumber ?? string.Empty,
+                Address = user?.Address ?? string.Empty
+            };
+
+            return View(model);
+        }
+
+        // پردازش فرم و ذخیره در دیتابیس
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Checkout(CheckoutViewModel model)
+        {
+            var cart = HttpContext.Session.GetObject<CartViewModels>(CartSessionKey) ?? new CartViewModels();
+
+            if (cart.Items == null || cart.Items.Count == 0)
+            {
+                return RedirectToAction("Index", "Cart");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // استخراج کاربر فعلی جهت انتساب به سفارش
+            var user = await _userManager.GetUserAsync(User);
+
             // ۱. ثبت اطلاعات کلی سفارش
             var order = new Order
             {
+                UserId = user?.Id, // وصل کردن سفارش به آیدی کاربر
                 CustomerName = model.CustomerName,
                 PhoneNumber = model.PhoneNumber,
                 Address = model.Address,
                 OrderDate = DateTime.Now,
-                // محاسبه مجموع از روی لیست Items
                 TotalAmount = cart.Items.Sum(c => c.Price * c.Quantity),
-                IsPaid = false // در پروژه واقعی اینجا به درگاه بانکی وصل می‌شود
+                IsPaid = false // درگاه پرداخت
             };
 
             _context.Orders.Add(order);
-            _context.SaveChanges(); // ذخیره میکنیم تا Id سفارش ساخته شود
+            await _context.SaveChangesAsync(); // ایجاد Order.Id
 
-            // ۲. ثبت تک تک کالاهای داخل سبد خرید برای این سفارش
+            // ۲. ثبت اقلام داخل سبد خرید
             foreach (var item in cart.Items)
             {
                 var orderItem = new OrderItem
@@ -74,16 +94,17 @@ namespace DynamicStore.Controllers
                 };
                 _context.OrderItems.Add(orderItem);
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            // ۳. پاک کردن سبد خرید (چون خرید موفق بود)
+            // ۳. پاک کردن سبد خرید بعد از ثبت موفق
             HttpContext.Session.Remove(CartSessionKey);
 
-            // ۴. انتقال کاربر به صفحه تایید نهایی
+            // ۴. انتقال به صفحه تایید نهایی
             return RedirectToAction("Success", new { orderId = order.Id });
         }
 
         // صفحه موفقیت‌آمیز بودن ثبت سفارش
+        [HttpGet]
         public IActionResult Success(int orderId)
         {
             ViewBag.OrderId = orderId;
